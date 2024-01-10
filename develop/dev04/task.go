@@ -1,5 +1,10 @@
 package main
 
+import (
+	"slices"
+	"strings"
+)
+
 /*
 === Поиск анаграмм по словарю ===
 
@@ -19,6 +24,24 @@ package main
 Программа должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
-func main() {
+func SetsOfAnagrams(in []string) *map[string][]string {
+	tempHashes := make(map[string][]string)
 
+	for i := range in {
+		word := strings.ToLower(in[i])
+		runes := strings.Split(word, "")
+		slices.Sort(runes)
+		word = strings.Join(runes, "")
+
+		tempHashes[word] = append(tempHashes[word], in[i])
+	}
+	out := make(map[string][]string)
+
+	for _, anagrams := range tempHashes {
+		if len(anagrams) > 1 {
+			firstWord := anagrams[0]
+			out[firstWord] = append([]string{}, anagrams...)
+		}
+	}
+	return &out
 }
