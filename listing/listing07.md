@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func asChan(vs ...int) <-chan int {
+func WriteChan(vs ...int) <-chan int {
 	c := make(chan int)
 
 	go func() {
@@ -23,34 +23,40 @@ func asChan(vs ...int) <-chan int {
 	return c
 }
 
-func merge(a, b <-chan int) <-chan int {
-	c := make(chan int)
+func FanIn(a, b <-chan int) <-chan int {
+	ch := make(chan int)
 	go func() {
 		for {
 			select {
-			case v := <-a:
-				c <- v
-			case v := <-b:
-				c <- v
+			case v := <-a: // case v, okA := <-a
+				// if okA { ch <- v }
+				ch <- v
+			case v := <-b: // case v,okB := <-b
+				// if okB { ch <- v }
+				ch <- v
 			}
+			// if !okA && !okB { // Завершаем горутину, если оба канала закрыты.
+			// 	return
+			// }
 		}
 	}()
-	return c
+	return ch
 }
 
 func main() {
 
-	a := asChan(1, 3, 5, 7)
-	b := asChan(2, 4 ,6, 8)
-	c := merge(a, b )
-	for v := range c {
+	ch1 := WriteChan(1, 3, 5, 7)
+	ch2 := WriteChan(2, 4 ,6, 8)
+	
+	fan := FanIn(ch1, ch2 )
+	for v := range fan {
 		fmt.Println(v)
 	}
 }
 ```
 
 Ответ:
-```
-...
+`1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0...`
 
-```
+`FanIn` не проверяет закрыты ли каналы, поэтому будут бесконечные нули. Чтение закрытого канала не вызывает ошибку, просто выдаёт дефолтные значения этоготипа. Возможное решение указал в комментариях выше.
+
