@@ -1,5 +1,13 @@
 package main
 
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"os/exec"
+	"strings"
+)
+
 /*
 === Взаимодействие с ОС ===
 
@@ -15,5 +23,30 @@ package main
 */
 
 func main() {
+	fmt.Println("Welcome to the Dev08")
+	fmt.Println("Usage: <command> <args>")
+	fmt.Println("requires bash or Git-bash/WSL to work")
+	fmt.Println("Ctrl+C to exit")
 
+	reader := bufio.NewReader(os.Stdin)
+	for {
+
+		fmt.Println("wb-shell$")
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
+
+		args := strings.Fields(input)
+
+		var cmd *exec.Cmd
+		if len(args) <= 1 {
+			cmd = exec.Command(input)
+		} else {
+			cmd = exec.Command(args[0], args[1:]...)
+		}
+
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Run()
+	}
 }
