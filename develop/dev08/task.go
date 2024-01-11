@@ -31,22 +31,14 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
 
-		fmt.Println("wb-shell$")
+		fmt.Print("$")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
 
-		args := strings.Fields(input)
-
-		var cmd *exec.Cmd
-		if len(args) <= 1 {
-			cmd = exec.Command(input)
-		} else {
-			cmd = exec.Command(args[0], args[1:]...)
-		}
+		cmd := exec.Command("bash", "-c", input)
 
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
 		cmd.Run()
 	}
 }
