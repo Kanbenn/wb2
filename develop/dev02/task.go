@@ -48,8 +48,6 @@ func UnzipStr(s string) (string, error) {
 			sb.WriteString(str)
 		}
 		prevRune = r
-
 	}
-
 	return sb.String(), nil
 }
