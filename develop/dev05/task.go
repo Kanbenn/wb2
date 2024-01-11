@@ -1,5 +1,12 @@
 package main
 
+import (
+	"bufio"
+	"os"
+	"os/exec"
+	"strings"
+)
+
 /*
 === Утилита grep ===
 
@@ -19,5 +26,15 @@ package main
 */
 
 func main() {
+	reader := bufio.NewReader(os.Stdin)
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(input)
 
+	cmd := exec.Command("grep", input)
+
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	cmd.Run()
 }
