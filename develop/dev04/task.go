@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 )
@@ -25,17 +26,10 @@ import (
 */
 
 func SetsOfAnagrams(in []string) *map[string][]string {
-	tempHashes := make(map[string][]string)
-
-	for i := range in {
-		word := strings.ToLower(in[i])
-		runes := strings.Split(word, "")
-		slices.Sort(runes)
-		word = strings.Join(runes, "")
-
-		tempHashes[word] = append(tempHashes[word], in[i])
-	}
 	out := make(map[string][]string)
+
+	tempHashes := makeMapOfSortedHashesUsingRunes(in)
+	// tempHashes := makeMapOfSortedHashesUsingStrings(in)
 
 	for _, anagrams := range tempHashes {
 		if len(anagrams) > 1 {
@@ -44,4 +38,34 @@ func SetsOfAnagrams(in []string) *map[string][]string {
 		}
 	}
 	return &out
+}
+
+func makeMapOfSortedHashesUsingRunes(in []string) map[string][]string {
+	out := make(map[string][]string)
+	for i := range in {
+		str := strings.ToLower(in[i])
+		runes := []rune(str)
+		slices.Sort(runes)
+		hash := string(runes)
+		out[hash] = append(out[hash], in[i])
+	}
+	return out
+}
+
+func makeMapOfSortedHashesUsingStrings(in []string) map[string][]string {
+	out := make(map[string][]string)
+	for i := range in {
+		str := strings.ToLower(in[i])
+		letters := strings.Split(str, "")
+		slices.Sort(letters)
+		hash := strings.Join(letters, "")
+		out[hash] = append(out[hash], in[i])
+	}
+	return out
+}
+
+func main() {
+	in := []string{"Пятак", "пЯтка", "тяпкА", "Листок", "слИток", "стОлик", "одувАн"}
+
+	fmt.Println(SetsOfAnagrams(in))
 }

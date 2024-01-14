@@ -11,7 +11,7 @@ import (
 /*
 === Взаимодействие с ОС ===
 
-Необходимо реализовать собственный шелл
+# Необходимо реализовать собственный шелл
 
 встроенные команды: cd/pwd/echo/kill/ps
 поддержать fork/exec команды
@@ -22,23 +22,23 @@ import (
 Программа должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
+const intro = `Welcome to the dev08 - a bash emulator
+Usage: <command> <args>
+requires bash or Git-bash/WSL to work
+Ctrl+C to exit`
+
 func main() {
-	fmt.Println("Welcome to the Dev08")
-	fmt.Println("Usage: <command> <args>")
-	fmt.Println("requires bash or Git-bash/WSL to work")
-	fmt.Println("Ctrl+C to exit")
+	fmt.Println(intro)
 
 	reader := bufio.NewReader(os.Stdin)
 	for {
-
 		fmt.Print("$")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
 
 		cmd := exec.Command("bash", "-c", input)
 
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
+		cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 		cmd.Run()
 	}
 }

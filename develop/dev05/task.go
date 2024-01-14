@@ -26,15 +26,12 @@ import (
 */
 
 func main() {
-	reader := bufio.NewReader(os.Stdin)
-	input, _ := reader.ReadString('\n')
+	input, _ := bufio.NewReader(os.Stdin).ReadString('\n')
 	input = strings.TrimSpace(input)
+	args := strings.Split(input, " ")
 
-	cmd := exec.Command("grep", input)
-
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd := exec.Command("grep", args...)
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 
 	cmd.Run()
 }
