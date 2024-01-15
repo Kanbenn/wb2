@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 	"strings"
 	"unicode"
 )
@@ -71,7 +70,7 @@ func UnzipStr(s string) (string, error) {
 		// если это число, берём предыдущую руну и повторяем её столько раз.
 		if isDigit {
 			repeat := int(r - '1')
-			log.Println("repeat:", repeat)
+			// log.Println("repeat:", repeat)
 			if repeat < 0 {
 				return s, ErrIncorrectString
 			}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"testing"
 )
 
@@ -95,10 +94,10 @@ func TestUnzipStr(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := UnzipStr(tt.arg)
-			log.Println("arg:", tt.arg)
-			log.Println("got:", got)
-			log.Println("expected:", tt.want)
-			log.Println()
+			// log.Println("arg:", tt.arg)
+			// log.Println("got:", got)
+			// log.Println("expected:", tt.want)
+			// log.Println()
 			if err != tt.wantErr {
 				t.Errorf("UnzipStr() error = %v, want.err %v", err, tt.wantErr)
 				return
