@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"strings"
 	"unicode"
 )
@@ -70,15 +71,24 @@ func UnzipStr(s string) (string, error) {
 		// если это число, берём предыдущую руну и повторяем её столько раз.
 		if isDigit {
 			repeat := int(r - '1')
+			log.Println("repeat:", repeat)
+			if repeat < 0 {
+				return s, ErrIncorrectString
+			}
 			if prevRune == -1 { // если prevRune == -1 значит предыдущий символ бэк-слэш
 				prevRune = backSlash // возвращаю бэкслэш, чтобы код ниже мог сделать распаковку слэша.
 			}
-			str := strings.Repeat(string(prevRune), repeat)
-			sb.WriteString(str)
+			// str := strings.Repeat(string(prevRune), repeat)
+			// sb.WriteString(str)
+			for i := 0; i < repeat; i++ {
+				sb.WriteRune(prevRune)
+			}
+
 		}
 		prevRune = r
 		isEscaped = false
 	}
+
 	return sb.String(), nil
 }
 

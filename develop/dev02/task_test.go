@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"log"
+	"testing"
+)
 
 func TestUnzipStr(t *testing.T) {
 	tests := []struct {
@@ -70,10 +73,32 @@ func TestUnzipStr(t *testing.T) {
 			want:    `qwe\\\\\`,
 			wantErr: nil,
 		},
+		{
+			name:    "edge case распаковка единицы",
+			arg:     `qwe1rty`,
+			want:    `qwerty`,
+			wantErr: nil,
+		},
+		{
+			name:    "edge case распаковка единицы",
+			arg:     `qwe\\1rty`,
+			want:    `qwe\rty`,
+			wantErr: nil,
+		},
+		{
+			name:    "edge case распаковка нуля",
+			arg:     `qwe\\0rty`,
+			want:    `qwe\\0rty`,
+			wantErr: ErrIncorrectString,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := UnzipStr(tt.arg)
+			log.Println("arg:", tt.arg)
+			log.Println("got:", got)
+			log.Println("expected:", tt.want)
+			log.Println()
 			if err != tt.wantErr {
 				t.Errorf("UnzipStr() error = %v, want.err %v", err, tt.wantErr)
 				return
