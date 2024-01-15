@@ -30,11 +30,60 @@ var ErrIncorrectString = errors.New("некорректная строка")
 func UnzipStr(s string) (string, error) {
 	var prevRune rune
 	var sb strings.Builder
+	var isEscaped bool
+
+	backSlash := '\\'
+
+	for i, r := range s {
+		isDigit := unicode.IsDigit(r)
+		isBackSlash := (r == backSlash)
+
+		// если первый символ это число -- ошибка.
+		// если два числа подряд и предыдущее число не эскейплено -- ошибка.
+		if isDigit && i == 0 || (isDigit && unicode.IsDigit(prevRune) && !isEscaped) {
+			return s, ErrIncorrectString
+		}
+
+		{ // обработка слэшей
+			if isBackSlash && prevRune != backSlash {
+				prevRune = r
+				continue
+			}
+			if isBackSlash && prevRune == backSlash { // если два слэйша подряд
+				sb.WriteRune(r) // пишу только один слэш из двух
+				prevRune = -1   // и обнуляю предыдущую руну.
+				continue
+			}
+		}
+
+		if !isDigit || prevRune == backSlash {
+			sb.WriteRune(r)
+			if isDigit {
+				prevRune = r
+				isEscaped = true // эскейпим это число на следующую итерацию чтобы не сработала ошибка.
+				continue
+			}
+		}
+		isEscaped = false
+		// если это число, берём предыдущую руну и повторяем её столько раз.
+		if isDigit {
+			repeat := int(r - '1')
+			str := strings.Repeat(string(prevRune), repeat)
+			sb.WriteString(str)
+		}
+		prevRune = r
+	}
+	return sb.String(), nil
+}
+
+// вариант решения без дополнительного задания по обработке слэшей
+func UnzipStrNoBackSlashes(s string) (string, error) {
+	var prevRune rune
+	var sb strings.Builder
 
 	for i, r := range s {
 		isDigit := unicode.IsDigit(r)
 
-		// если первый символ это число или если два числа подряд -- ошибка.
 		if (isDigit && i == 0) || (isDigit && unicode.IsDigit(prevRune)) {
 			return s, ErrIncorrectString
 		}
@@ -42,7 +91,7 @@ func UnzipStr(s string) (string, error) {
 			sb.WriteRune(r)
 		}
 		// если это число, берём предыдущую руну и повторяем её столько раз.
-		if isDigit && !unicode.IsDigit(prevRune) {
+		if isDigit {
 			repeat := int(r - '1')
 			str := strings.Repeat(string(prevRune), repeat)
 			sb.WriteString(str)

@@ -11,12 +11,6 @@ func TestUnzipStr(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{
-			name:    "case1",
-			arg:     "a4bc2d5e",
-			want:    "aaaabccddddde",
-			wantErr: nil,
-		},
-		{
 			name:    "err case два числа подряд",
 			arg:     "a2b45cd",
 			want:    "a2b45cd",
@@ -29,17 +23,53 @@ func TestUnzipStr(t *testing.T) {
 			wantErr: ErrIncorrectString,
 		},
 		{
+			name:    "case1",
+			arg:     "a3bc2d5e",
+			want:    "aaabccddddde",
+			wantErr: nil,
+		},
+		{
 			name:    "edge case число в конце",
 			arg:     "abcd3",
 			want:    "abcddd",
 			wantErr: nil,
 		},
 		{
-			name:    "edge case только буквы",
+			name:    "case только буквы",
 			arg:     "abcd",
 			want:    "abcd",
 			wantErr: nil,
 		},
+		{
+			name:    "case слэш",
+			arg:     `qw\\e`,
+			want:    `qw\e`,
+			wantErr: nil,
+		},
+		{
+			name:    "edge case много слэшей",
+			arg:     `\\\\qw\\\\\\e`,
+			want:    `\\qw\\\e`,
+			wantErr: nil,
+		},
+		{
+			name:    "edge case числа",
+			arg:     `\3qwe\5`,
+			want:    `3qwe5`,
+			wantErr: nil,
+		},
+		{
+			name:    "edge case распаковка числа",
+			arg:     `qwe\35`,
+			want:    `qwe33333`,
+			wantErr: nil,
+		},
+		// {
+		// 	name:    "edge case распаковка слэша",
+		// 	arg:     `qwe\\5`,
+		// 	want:    `qwe\\\\\`,
+		// 	wantErr: nil,
+		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
