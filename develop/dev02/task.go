@@ -40,7 +40,10 @@ func UnzipStr(s string) (string, error) {
 
 		// если первый символ это число -- ошибка.
 		// если два числа подряд и предыдущее число не эскейплено -- ошибка.
-		if isDigit && i == 0 || (isDigit && unicode.IsDigit(prevRune) && !isEscaped) {
+		firstSymbolIsDigit := (isDigit && (i == 0))
+		isUnescapedPrevDigit := (unicode.IsDigit(prevRune) && !isEscaped)
+		twoUnescapedDigitsInARow := (isDigit && isUnescapedPrevDigit)
+		if firstSymbolIsDigit || twoUnescapedDigitsInARow {
 			return s, ErrIncorrectString
 		}
 
@@ -51,7 +54,7 @@ func UnzipStr(s string) (string, error) {
 			}
 			if isBackSlash && prevRune == backSlash { // если два слэйша подряд
 				sb.WriteRune(r) // пишу только один слэш из двух
-				prevRune = -1   // и обнуляю предыдущую руну.
+				prevRune = -1   // и обнуляю предыдущую руну чтобы следующая итерация игнорила слэш.
 				continue
 			}
 		}
@@ -67,8 +70,8 @@ func UnzipStr(s string) (string, error) {
 		// если это число, берём предыдущую руну и повторяем её столько раз.
 		if isDigit {
 			repeat := int(r - '1')
-			if prevRune == -1 {
-				prevRune = backSlash
+			if prevRune == -1 { // если prevRune == -1 значит предыдущий символ бэк-слэш
+				prevRune = backSlash // возвращаю бэкслэш, чтобы код ниже мог сделать распаковку слэша.
 			}
 			str := strings.Repeat(string(prevRune), repeat)
 			sb.WriteString(str)
