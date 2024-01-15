@@ -64,14 +64,17 @@ func UnzipStr(s string) (string, error) {
 				continue
 			}
 		}
-		isEscaped = false
 		// если это число, берём предыдущую руну и повторяем её столько раз.
 		if isDigit {
 			repeat := int(r - '1')
+			if prevRune == -1 {
+				prevRune = backSlash
+			}
 			str := strings.Repeat(string(prevRune), repeat)
 			sb.WriteString(str)
 		}
 		prevRune = r
+		isEscaped = false
 	}
 	return sb.String(), nil
 }

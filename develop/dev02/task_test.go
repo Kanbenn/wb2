@@ -64,12 +64,12 @@ func TestUnzipStr(t *testing.T) {
 			want:    `qwe33333`,
 			wantErr: nil,
 		},
-		// {
-		// 	name:    "edge case распаковка слэша",
-		// 	arg:     `qwe\\5`,
-		// 	want:    `qwe\\\\\`,
-		// 	wantErr: nil,
-		// },
+		{
+			name:    "edge case распаковка слэша",
+			arg:     `qwe\\5`,
+			want:    `qwe\\\\\`,
+			wantErr: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
