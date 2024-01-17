@@ -54,18 +54,19 @@ func UnzipStr(s string) (string, error) {
 			}
 			if isBackSlash && prevRune == backSlash { // если два слэйша подряд
 				sb.WriteRune(r) // пишу только один слэш из двух
-				prevRune = -1   // и обнуляю предыдущую руну чтобы следующая итерация игнорила слэш.
+				prevRune = -1   // и обнуляю предыдущую руну чтобы следующая итерация обошла эту проверку.
 				continue
 			}
 		}
 
-		if !isDigit || prevRune == backSlash {
+		if isDigit && prevRune == backSlash {
 			sb.WriteRune(r)
-			if isDigit {
-				prevRune = r
-				isEscaped = true // эскейпим это число на следующую итерацию чтобы не сработала ошибка.
-				continue
-			}
+			prevRune = r
+			isEscaped = true // эскейпим это число на следующую итерацию чтобы не сработала ошибка.
+			continue
+		}
+		if !isDigit {
+			sb.WriteRune(r)
 		}
 		// если это число, берём предыдущую руну и повторяем её столько раз.
 		if isDigit {
