@@ -4,9 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"log"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -24,46 +22,44 @@ import (
 */
 
 type config struct {
-	fields      string
-	delimiter   string
-	isSeparated bool
+	fields         int
+	delimiter      string
+	hideWrongLines bool
 }
 
 func parseFlags() config {
 	cfg := config{}
 
-	flag.StringVar(&cfg.fields, "f", "0", "fields")
-	flag.StringVar(&cfg.delimiter, "d", "\t", "delimiter")
-	flag.BoolVar(&cfg.isSeparated, "s", false, "separated")
+	flag.IntVar(&cfg.fields, "f", 0, "показать все столбцы или только этот столбец")
+	flag.StringVar(&cfg.delimiter, "d", "\t", "разделитель")
+	flag.BoolVar(&cfg.hideWrongLines, "s", true, "скрывать ли строки без разделителя")
 	flag.Parse()
 
 	return cfg
 }
 
-func cut(input string, cfg config) string {
-	if cfg.isSeparated && !strings.Contains(input, cfg.delimiter) {
-		log.Fatal("incorrect string:", input)
-	}
-	var sb strings.Builder
+func cut(sc *bufio.Scanner, cfg config) {
 
-	splitted := strings.Split(input, cfg.delimiter)
-	columns := strings.Split(cfg.fields, ",")
-	for i := 0; i < len(columns); i++ {
-		column, err := strconv.Atoi(columns[i])
-		if err != nil {
-			log.Fatal(err)
+	for sc.Scan() {
+		line := sc.Text()
+		if !cfg.hideWrongLines && !strings.Contains(line, cfg.delimiter) {
+			continue
 		}
-		sb.WriteString(splitted[column])
+		columns := strings.Split(line, cfg.delimiter)
+
+		if cfg.fields == 0 {
+			fmt.Println(strings.Join(columns, " "))
+		} else {
+			if len(columns) >= cfg.fields {
+				fmt.Println(columns[cfg.fields-1])
+			}
+		}
 	}
-	return sb.String()
 }
 
 func main() {
 	cfg := parseFlags()
 	sc := bufio.NewScanner(os.Stdin)
 
-	for sc.Scan() {
-		text := sc.Text()
-		fmt.Println("cutting: ", cut(text, cfg))
-	}
+	cut(sc, cfg)
 }
