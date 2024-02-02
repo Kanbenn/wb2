@@ -15,16 +15,16 @@ func TestSetOfAnagrams(t *testing.T) {
 			name: "case1_WildBerriesL2-4",
 			args: []string{"Пятак", "пЯтка", "тяпкА", "Листок", "слИток", "стОлик", "одувАн"},
 			want: &map[string][]string{
-				"Пятак":  {"Пятак", "пЯтка", "тяпкА"},
-				"Листок": {"Листок", "слИток", "стОлик"},
+				"пятак":  {"пятак", "пятка", "тяпка"},
+				"листок": {"листок", "слиток", "столик"},
 			},
 		},
 		{
 			name: "case2_LeetCode242",
 			args: []string{"Anagram", "nAgaram", "cAr", "Arc", "Love"},
 			want: &map[string][]string{
-				"Anagram": {"Anagram", "nAgaram"},
-				"cAr":     {"cAr", "Arc"},
+				"anagram": {"anagram", "nagaram"},
+				"car":     {"car", "arc"},
 			},
 		},
 		{

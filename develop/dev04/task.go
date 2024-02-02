@@ -47,7 +47,7 @@ func makeMapOfSortedHashesUsingRunes(in []string) map[string][]string {
 		runes := []rune(str)
 		slices.Sort(runes)
 		hash := string(runes)
-		out[hash] = append(out[hash], in[i])
+		out[hash] = append(out[hash], str)
 	}
 	return out
 }
@@ -59,7 +59,7 @@ func makeMapOfSortedHashesUsingStrings(in []string) map[string][]string {
 		letters := strings.Split(str, "")
 		slices.Sort(letters)
 		hash := strings.Join(letters, "")
-		out[hash] = append(out[hash], in[i])
+		out[hash] = append(out[hash], str)
 	}
 	return out
 }
