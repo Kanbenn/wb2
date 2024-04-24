@@ -1,13 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"flag"
-	"io"
-	"log"
+	"fmt"
 	"net"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 )
@@ -26,54 +25,57 @@ go-telnet --timeout=10s host port go-telnet mysite.ru 8080 go-telnet --timeout=3
 При нажатии Ctrl+D программа должна закрывать сокет и завершаться. Если сокет закрывается со стороны сервера, программа должна также завершаться.
 При подключении к несуществующему сервер, программа должна завершаться через timeout.
 */
-
-func copyTo(gracefulShutdown chan os.Signal, dst io.Writer, src io.Reader) {
-	if _, err := io.Copy(dst, src); err != nil {
-		log.Println(err)
-		gracefulShutdown <- os.Interrupt
-	}
-}
-
-func builAddress(args []string) string {
-	var b strings.Builder
-
-	b.WriteString(args[0])
-	b.WriteString(":")
-	b.WriteString(args[1])
-
-	return b.String()
-}
-
 func main() {
-	fTimeout := flag.Int("t", 10, "Connection end time in seconds")
+	// Парсинг аргументов командной строки
+	timeout := flag.Duration("timeout", 10*time.Second, "таймаут на подключение к серверу")
 	flag.Parse()
 
-	args := flag.Args()
-	if len(args) < 2 {
-		log.Fatal("error: empty ip and port")
-	}
+	// Получение аргументов - адрес хоста и порт
+	host := flag.Arg(0)
+	port := flag.Arg(1)
 
-	// Создаем TCP-соединение
-	addr := builAddress(args)
-	conn, err := net.Dial("tcp", addr)
+	// Установка обработчика сигнала для завершения программы при нажатии Ctrl+C или Ctrl+D
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	go func() {
+		<-sigCh
+		fmt.Println("Программа завершена")
+		os.Exit(0)
+	}()
+
+	// Подключение к серверу
+	conn, err := net.DialTimeout("tcp", host+":"+port, *timeout)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("Ошибка подключения к серверу: %s\n", err.Error())
+		os.Exit(1)
 	}
 	defer conn.Close()
 
-	// Выход по Ctrl + С
-	gracefulShutdown := make(chan os.Signal, 1)
-	signal.Notify(gracefulShutdown, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, os.Interrupt)
+	fmt.Println("Подключено к", conn.RemoteAddr())
 
+	// Чтение данных из STDIN и запись в сокет, чтение данных из сокета и вывод в STDOUT
 	go func() {
-		<-time.After(time.Duration(*fTimeout) * time.Second)
-		gracefulShutdown <- os.Interrupt
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			data := scanner.Bytes()
+			_, err := conn.Write(data)
+			if err != nil {
+				fmt.Printf("Ошибка записи в сокет: %s\n", err.Error())
+				break
+			}
+
+			response := make([]byte, 1024)
+			_, err = conn.Read(response)
+			if err != nil {
+				fmt.Printf("Ошибка чтения из сокета: %s\n", err.Error())
+				break
+			}
+
+			fmt.Println(string(response))
+		}
 	}()
 
-	// Общение клиента с сервером
-	go copyTo(gracefulShutdown, os.Stdout, conn) // читаем из сокета
-	go copyTo(gracefulShutdown, conn, os.Stdin)  // пишем в сокет
-
-	<-gracefulShutdown
-	log.Println("connection was closed")
+	// Ожидание завершения программы при закрытии со стороны сервера
+	<-sigCh
+	fmt.Println("Соединение разорвано")
 }
